@@ -208,3 +208,4 @@ The test suite in [`tests/`](file:///tests/) achieves 100% pass rate across 16 u
 ## 9. Conclusion
 
 The BashCraft Website Sitemap & Link Analyzer meets and exceeds all requirements set forth in the recruitment specification. Built strictly with standard web fundamentals, clean code organization, and zero fluff, it provides a dependable tool for real-world web analysis.
+

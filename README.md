@@ -345,3 +345,4 @@ Bashcraft/
 - [x] **Edge cases** tested and documented (loop prevention, SPA parsing, canonical URLs, broken links).
 - [x] **16/16 Unit & Integration Tests** passing.
 - [x] **Zero credentials or secrets** committed.
+

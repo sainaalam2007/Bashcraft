@@ -105,3 +105,4 @@ class LinkAuditor:
         )
 
         return link
+

@@ -27,3 +27,4 @@ class CrawlConfig(BaseModel):
         description="Verify status codes for external links as well as internal ones"
     )
     concurrency: int = Field(default=4, ge=1, le=16, description="Parallel worker threads")
+

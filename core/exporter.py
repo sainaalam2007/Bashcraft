@@ -167,3 +167,4 @@ class SitemapExporter:
 
         md.append("---\n*Generated automatically by BashCraft Sitemap Analyzer.*")
         return "\n".join(md)
+

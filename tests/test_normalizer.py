@@ -87,3 +87,4 @@ class TestURLNormalizer:
         # Anchor
         cat, val = URLNormalizer.classify_href("#section-1", base)
         assert cat == "anchor"
+

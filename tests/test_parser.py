@@ -56,3 +56,4 @@ class TestPageParser:
         """
         parsed = PageParser.parse(html, "https://bashcraftclub.vercel.app/")
         assert parsed.is_spa_skeleton is True
+

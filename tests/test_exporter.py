@@ -107,3 +107,4 @@ class TestSitemapExporter:
         assert "# 🗺️ BashCraft Website Sitemap" in md
         assert "95.0/100" in md
         assert "Broken Link Diagnostics" in md
+

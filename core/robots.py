@@ -60,3 +60,4 @@ class RobotsManager:
             return self.parser.can_fetch(self.user_agent, url)
         except Exception:
             return True
+

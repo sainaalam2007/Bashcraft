@@ -216,3 +216,4 @@ class URLNormalizer:
             return ("internal_page", normalized)
         else:
             return ("external", normalized)
+

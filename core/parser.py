@@ -100,3 +100,4 @@ class PageParser:
             result.is_spa_skeleton = True
 
         return result
+
