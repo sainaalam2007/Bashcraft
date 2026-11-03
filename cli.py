@@ -31,7 +31,7 @@ from core.normalizer import URLNormalizer
 
 console = Console(force_terminal=True, highlight=False)
 
-BANNER = """[bold green]
+BANNER = r"""[bold green]
  ____            _      ____raft
 | __ )  __ _ ___| |__  / ___|_ __ __ _ / _| |_ 
 |  _ \ / _` / __| '_ \| |   | '__/ _` | |_| __|
