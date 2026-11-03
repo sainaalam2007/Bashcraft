@@ -1,0 +1,104 @@
+/* Custom styles for BashCraft Sitemap Analyzer */
+
+body {
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+}
+
+code, pre, .font-mono {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* Tab active style */
+.tab-btn.active {
+  background-color: #1e293b;
+  color: #34d399;
+  border-bottom: 2px solid #10b981;
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #090d16;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
+
+/* Tree styling */
+.tree-node {
+  margin-left: 1.25rem;
+  position: relative;
+}
+
+.tree-node::before {
+  content: '';
+  position: absolute;
+  top: 0.75rem;
+  left: -0.75rem;
+  width: 0.5rem;
+  height: 1px;
+  background-color: #334155;
+}
+
+.tree-node::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -0.75rem;
+  bottom: 0;
+  width: 1px;
+  background-color: #334155;
+}
+
+.tree-node:last-child::after {
+  height: 0.75rem;
+}
+
+/* Light Mode Overrides */
+html:not(.dark) body {
+  background-color: #f8fafc;
+  color: #0f172a;
+}
+
+html:not(.dark) header {
+  background-color: #ffffff;
+  border-color: #e2e8f0;
+}
+
+html:not(.dark) .bg-dark-900 {
+  background-color: #f1f5f9;
+}
+
+html:not(.dark) .bg-dark-800 {
+  background-color: #ffffff;
+}
+
+html:not(.dark) .border-dark-700,
+html:not(.dark) .border-dark-600 {
+  border-color: #e2e8f0;
+}
+
+html:not(.dark) .text-white {
+  color: #0f172a;
+}
+
+html:not(.dark) .text-slate-300,
+html:not(.dark) .text-slate-400 {
+  color: #475569;
+}
+
+html:not(.dark) .tab-btn.active {
+  background-color: #f1f5f9;
+  color: #059669;
+  border-bottom-color: #059669;
+}

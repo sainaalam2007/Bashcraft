@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BashCraft Sitemap & Link Analyzer</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0fdf4',
+              500: '#22c55e',
+              600: '#16a34a',
+              700: '#15803d',
+              accent: '#38bdf8'
+            },
+            dark: {
+              900: '#090d16',
+              800: '#0f172a',
+              700: '#1e293b',
+              600: '#334155'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <!-- Vis.js Network for interactive force-directed graph -->
+  <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/style.css" />
+</head>
+<body class="bg-dark-900 text-slate-100 min-h-screen font-sans flex flex-col selection:bg-brand-500 selection:text-white">
+
+  <!-- Header -->
+  <header class="border-b border-dark-700 bg-dark-800/80 backdrop-blur sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-brand-accent flex items-center justify-center shadow-lg shadow-brand-500/20">
+          <i class="fa-solid fa-sitemap text-white text-lg"></i>
+        </div>
+        <div>
+          <div class="flex items-center space-x-2">
+            <span class="font-extrabold text-lg tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 via-teal-300 to-sky-400">
+              BashCraft
+            </span>
+            <span class="text-xs px-2 py-0.5 rounded-full font-mono font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+              Sitemap Engine
+            </span>
+          </div>
+          <p class="text-xs text-slate-400">No fluff. Only asli engineering.</p>
+        </div>
+      </div>
+
+      <div class="flex items-center space-x-3">
+        <button id="themeToggleBtn" class="p-2 rounded-lg bg-dark-700 text-slate-300 hover:text-white border border-dark-600 transition">
+          <i class="fa-solid fa-sun" id="themeIcon"></i>
+        </button>
+        <a href="https://github.com/BashCraftClub" target="_blank" class="text-xs font-medium px-3 py-1.5 rounded-lg bg-dark-700 text-slate-300 hover:text-white border border-dark-600 transition flex items-center space-x-1.5">
+          <i class="fa-brands fa-github text-sm"></i>
+          <span>BashCraft</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full space-y-6">
+
+    <!-- Hero / Crawler Controller Card -->
+    <section class="bg-dark-800 border border-dark-700 rounded-2xl p-6 shadow-xl relative overflow-hidden">
+      <div class="absolute -right-20 -top-20 w-80 h-80 bg-brand-500/5 rounded-full blur-3xl pointer-events-none"></div>
+
+      <div class="space-y-4">
+        <div>
+          <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-white flex items-center gap-2">
+            <span>Explore, Crawl & Visualize Website Architecture</span>
+          </h1>
+          <p class="text-sm text-slate-400 mt-1">
+            Engineered specifically for single-page applications (React/Next/Vite) & traditional websites. Discovers pages, detects broken links, parses SPA routes, and generates structured sitemaps.
+          </p>
+        </div>
+
+        <!-- URL Input Form -->
+        <form id="crawlForm" class="space-y-4">
+          <div class="flex flex-col sm:flex-row gap-3">
+            <div class="relative flex-1">
+              <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                <i class="fa-solid fa-globe"></i>
+              </div>
+              <input
+                type="url"
+                id="urlInput"
+                required
+                value="{{ default_url }}"
+                placeholder="https://bashcraftclub.vercel.app/"
+                class="w-full pl-10 pr-24 py-3 bg-dark-900 border border-dark-600 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 font-mono text-sm transition"
+              />
+              <button
+                type="button"
+                id="resetBashcraftBtn"
+                class="absolute right-2.5 top-1/2 -translate-y-1/2 px-2.5 py-1 text-xs font-medium rounded-lg bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/30 transition"
+                title="Reset to official BashCraft URL"
+              >
+                BashCraft
+              </button>
+            </div>
+
+            <button
+              type="submit"
+              id="crawlBtn"
+              class="px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-semibold text-sm shadow-lg shadow-emerald-500/25 flex items-center justify-center space-x-2 transition disabled:opacity-50"
+            >
+              <i class="fa-solid fa-play" id="btnIcon"></i>
+              <span id="btnText">Start Crawl</span>
+            </button>
+          </div>
+
+          <!-- Advanced Crawl Settings Accordion -->
+          <details class="group border border-dark-700 rounded-xl bg-dark-900/50 p-3.5 transition">
+            <summary class="flex items-center justify-between cursor-pointer text-xs font-semibold uppercase tracking-wider text-slate-400 select-none">
+              <span class="flex items-center gap-2">
+                <i class="fa-solid fa-sliders text-emerald-400"></i>
+                Crawler Configuration & Constraints
+              </span>
+              <i class="fa-solid fa-chevron-down group-open:rotate-180 transition-transform"></i>
+            </summary>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mt-4 pt-3 border-t border-dark-700/60 text-xs">
+              <div>
+                <label class="block text-slate-300 font-medium mb-1">Max Depth: <span id="depthVal" class="text-emerald-400 font-mono">3</span></label>
+                <input type="range" id="maxDepth" min="1" max="6" value="3" class="w-full accent-emerald-500" oninput="document.getElementById('depthVal').innerText = this.value" />
+                <span class="text-slate-500 text-[11px]">Maximum BFS tree depth</span>
+              </div>
+              <div>
+                <label class="block text-slate-300 font-medium mb-1">Max Pages: <span id="pagesVal" class="text-emerald-400 font-mono">50</span></label>
+                <input type="range" id="maxPages" min="5" max="150" step="5" value="50" class="w-full accent-emerald-500" oninput="document.getElementById('pagesVal').innerText = this.value" />
+                <span class="text-slate-500 text-[11px]">Safety limit for total pages</span>
+              </div>
+              <div class="space-y-2">
+                <label class="flex items-center space-x-2 cursor-pointer">
+                  <input type="checkbox" id="spaScan" checked class="rounded border-dark-600 text-emerald-500 focus:ring-emerald-500 bg-dark-900" />
+                  <span class="text-slate-300 font-medium">SPA Route Hydration</span>
+                </label>
+                <label class="flex items-center space-x-2 cursor-pointer">
+                  <input type="checkbox" id="checkBroken" checked class="rounded border-dark-600 text-emerald-500 focus:ring-emerald-500 bg-dark-900" />
+                  <span class="text-slate-300 font-medium">Audit Broken Links</span>
+                </label>
+              </div>
+              <div class="space-y-2">
+                <label class="flex items-center space-x-2 cursor-pointer">
+                  <input type="checkbox" id="respectRobots" checked class="rounded border-dark-600 text-emerald-500 focus:ring-emerald-500 bg-dark-900" />
+                  <span class="text-slate-300 font-medium">Respect robots.txt</span>
+                </label>
+                <div class="text-[11px] text-slate-500">
+                  Delay: <span class="font-mono text-slate-300">50ms</span> per polite request
+                </div>
+              </div>
+            </div>
+          </details>
+        </form>
+
+        <!-- Live Progress Status Bar -->
+        <div id="liveProgressContainer" class="hidden space-y-2 pt-2 border-t border-dark-700/60">
+          <div class="flex items-center justify-between text-xs">
+            <div class="flex items-center space-x-2">
+              <span class="relative flex h-2.5 w-2.5">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+              </span>
+              <span id="liveStatusText" class="font-mono text-emerald-400 font-medium">Crawling target...</span>
+            </div>
+            <span id="liveStatsIndicator" class="font-mono text-slate-400 text-xs">0 pages crawled</span>
+          </div>
+          <div class="w-full bg-dark-900 rounded-full h-2 overflow-hidden border border-dark-700">
+            <div id="liveProgressBar" class="bg-gradient-to-r from-emerald-500 to-sky-400 h-2 rounded-full transition-all duration-300" style="width: 15%"></div>
+          </div>
+          <p id="liveLogMsg" class="font-mono text-[11px] text-slate-500 truncate"></p>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Results Section (hidden until first crawl or loaded from demonstration) -->
+    <div id="resultsWrapper" class="space-y-6">
+
+      <!-- Stat Cards -->
+      <section class="grid grid-cols-2 md:grid-cols-5 gap-3 sm:gap-4">
+        <!-- Pages Crawled -->
+        <div class="bg-dark-800 border border-dark-700 rounded-xl p-4 shadow-sm flex flex-col justify-between">
+          <div class="flex items-center justify-between text-slate-400 text-xs">
+            <span>Pages Analyzed</span>
+            <i class="fa-solid fa-file-lines text-emerald-400"></i>
+          </div>
+          <div class="mt-2 flex items-baseline">
+            <span id="statPages" class="text-2xl sm:text-3xl font-extrabold text-white font-mono">0</span>
+            <span id="statDiscovered" class="text-xs text-slate-500 ml-1.5 font-mono">/ 0 found</span>
+          </div>
+        </div>
+
+        <!-- Internal Links -->
+        <div class="bg-dark-800 border border-dark-700 rounded-xl p-4 shadow-sm flex flex-col justify-between">
+          <div class="flex items-center justify-between text-slate-400 text-xs">
+            <span>Internal Links</span>
+            <i class="fa-solid fa-link text-sky-400"></i>
+          </div>
+          <div class="mt-2">
+            <span id="statInternal" class="text-2xl sm:text-3xl font-extrabold text-sky-400 font-mono">0</span>
+          </div>
+        </div>
+
+        <!-- External Links -->
+        <div class="bg-dark-800 border border-dark-700 rounded-xl p-4 shadow-sm flex flex-col justify-between">
+          <div class="flex items-center justify-between text-slate-400 text-xs">
+            <span>External Links</span>
+            <i class="fa-solid fa-arrow-up-right-from-square text-indigo-400"></i>
+          </div>
+          <div class="mt-2">
+            <span id="statExternal" class="text-2xl sm:text-3xl font-extrabold text-indigo-400 font-mono">0</span>
+          </div>
+        </div>
+
+        <!-- Broken Links -->
+        <div class="bg-dark-800 border border-dark-700 rounded-xl p-4 shadow-sm flex flex-col justify-between">
+          <div class="flex items-center justify-between text-slate-400 text-xs">
+            <span>Broken Links</span>
+            <i class="fa-solid fa-triangle-exclamation text-rose-400"></i>
+          </div>
+          <div class="mt-2 flex items-baseline">
+            <span id="statBroken" class="text-2xl sm:text-3xl font-extrabold text-rose-400 font-mono">0</span>
+          </div>
+        </div>
+
+        <!-- Health Score -->
+        <div class="bg-dark-800 border border-dark-700 rounded-xl p-4 shadow-sm flex flex-col justify-between col-span-2 md:col-span-1">
+          <div class="flex items-center justify-between text-slate-400 text-xs">
+            <span>Health Score</span>
+            <i class="fa-solid fa-heart-pulse text-emerald-400"></i>
+          </div>
+          <div class="mt-2 flex items-baseline">
+            <span id="statHealth" class="text-2xl sm:text-3xl font-extrabold text-emerald-400 font-mono">100%</span>
+            <span id="statDuration" class="text-xs text-slate-500 ml-2 font-mono">0.0s</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Main Tabs Section -->
+      <section class="bg-dark-800 border border-dark-700 rounded-2xl shadow-xl overflow-hidden">
+        
+        <!-- Tab Navigation Bar -->
+        <div class="flex flex-wrap items-center justify-between border-b border-dark-700 px-4 bg-dark-900/40">
+          <nav class="flex space-x-1 sm:space-x-2 py-2" aria-label="Tabs">
+            <button class="tab-btn active px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold flex items-center gap-2 transition" data-target="tabGraph">
+              <i class="fa-solid fa-circle-nodes text-emerald-400"></i>
+              <span>Interactive Graph</span>
+            </button>
+            <button class="tab-btn px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold text-slate-400 hover:text-white flex items-center gap-2 transition" data-target="tabTree">
+              <i class="fa-solid fa-folder-tree text-teal-400"></i>
+              <span>Sitemap Tree</span>
+            </button>
+            <button class="tab-btn px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold text-slate-400 hover:text-white flex items-center gap-2 transition" data-target="tabTable">
+              <i class="fa-solid fa-table-list text-sky-400"></i>
+              <span>Discovered Pages (<span id="tableCountBadge">0</span>)</span>
+            </button>
+            <button class="tab-btn px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold text-slate-400 hover:text-white flex items-center gap-2 transition" data-target="tabBroken">
+              <i class="fa-solid fa-bug text-rose-400"></i>
+              <span>Broken Links (<span id="brokenCountBadge">0</span>)</span>
+            </button>
+          </nav>
+
+          <!-- Export Dropdown -->
+          <div class="py-2 flex items-center space-x-2">
+            <div class="relative inline-block text-left">
+              <button id="exportDropdownBtn" class="px-3 py-1.5 rounded-lg bg-dark-700 hover:bg-dark-600 text-xs font-medium text-white border border-dark-600 flex items-center gap-1.5 transition">
+                <i class="fa-solid fa-download text-emerald-400"></i>
+                <span>Export Sitemap</span>
+                <i class="fa-solid fa-chevron-down text-[10px]"></i>
+              </button>
+              <div id="exportMenu" class="hidden absolute right-0 mt-2 w-52 rounded-xl bg-dark-800 border border-dark-700 shadow-2xl z-50 p-1.5 space-y-1 text-xs">
+                <a href="/api/export/xml" download class="flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-dark-700 text-slate-300 hover:text-white transition">
+                  <i class="fa-solid fa-code text-amber-400 w-4"></i>
+                  <div>
+                    <div class="font-medium">XML Sitemap</div>
+                    <div class="text-[10px] text-slate-500">Google / W3C standard</div>
+                  </div>
+                </a>
+                <a href="/api/export/json" download class="flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-dark-700 text-slate-300 hover:text-white transition">
+                  <i class="fa-solid fa-brackets-curly text-sky-400 w-4"></i>
+                  <div>
+                    <div class="font-medium">JSON Dataset</div>
+                    <div class="text-[10px] text-slate-500">Full nodes & relations</div>
+                  </div>
+                </a>
+                <a href="/api/export/csv-pages" download class="flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-dark-700 text-slate-300 hover:text-white transition">
+                  <i class="fa-solid fa-file-csv text-emerald-400 w-4"></i>
+                  <div>
+                    <div class="font-medium">Pages CSV</div>
+                    <div class="text-[10px] text-slate-500">Spreadsheet table</div>
+                  </div>
+                </a>
+                <a href="/api/export/csv-broken" download class="flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-dark-700 text-slate-300 hover:text-white transition">
+                  <i class="fa-solid fa-file-excel text-rose-400 w-4"></i>
+                  <div>
+                    <div class="font-medium">Broken Links CSV</div>
+                    <div class="text-[10px] text-slate-500">Audit & diagnostic report</div>
+                  </div>
+                </a>
+                <a href="/api/export/markdown" download class="flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-dark-700 text-slate-300 hover:text-white transition">
+                  <i class="fa-brands fa-markdown text-indigo-400 w-4"></i>
+                  <div>
+                    <div class="font-medium">Markdown Report</div>
+                    <div class="text-[10px] text-slate-500">Readable summary documentation</div>
+                  </div>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 1: Interactive Network Graph -->
+        <div id="tabGraph" class="tab-content block p-4 space-y-3">
+          <div class="flex flex-wrap items-center justify-between gap-2 text-xs">
+            <div class="flex items-center space-x-2">
+              <span class="flex items-center gap-1.5 text-slate-400">
+                <span class="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span> Root / Healthy (200 OK)
+              </span>
+              <span class="flex items-center gap-1.5 text-slate-400 ml-3">
+                <span class="w-3 h-3 rounded-full bg-rose-500 inline-block"></span> Broken / Issue
+              </span>
+              <span class="flex items-center gap-1.5 text-slate-400 ml-3">
+                <span class="w-3 h-3 rounded-full bg-sky-500 inline-block"></span> Internal Route
+              </span>
+            </div>
+
+            <div class="flex items-center space-x-2">
+              <button id="fitGraphBtn" class="px-2.5 py-1 rounded bg-dark-700 hover:bg-dark-600 text-slate-300 hover:text-white transition">
+                <i class="fa-solid fa-expand mr-1"></i> Reset Zoom
+              </button>
+              <button id="physicsToggleBtn" class="px-2.5 py-1 rounded bg-dark-700 hover:bg-dark-600 text-slate-300 hover:text-white transition">
+                <i class="fa-solid fa-atom mr-1"></i> Freeze Physics
+              </button>
+            </div>
+          </div>
+
+          <!-- Network Canvas -->
+          <div id="networkGraphContainer" class="w-full h-[580px] bg-dark-900 rounded-xl border border-dark-700 relative overflow-hidden">
+            <div id="networkGraph" class="w-full h-full"></div>
+            
+            <!-- Floating Node Detail Card (Overlay on Click) -->
+            <div id="nodeDetailOverlay" class="hidden absolute top-4 right-4 max-w-sm w-full bg-dark-800/95 backdrop-blur-md border border-dark-600 rounded-xl p-4 shadow-2xl z-30 space-y-2.5 text-xs">
+              <div class="flex items-start justify-between">
+                <div>
+                  <span id="detailBadge" class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-400">200 OK</span>
+                  <h4 id="detailTitle" class="font-bold text-white text-sm mt-1 truncate">Page Title</h4>
+                </div>
+                <button id="closeDetailBtn" class="text-slate-400 hover:text-white">
+                  <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
+              </div>
+
+              <div class="space-y-1 font-mono text-[11px] text-slate-300 bg-dark-900/60 p-2.5 rounded-lg border border-dark-700 break-all">
+                <div><span class="text-slate-500">URL:</span> <a id="detailUrlLink" href="#" target="_blank" class="text-emerald-400 hover:underline"></a></div>
+                <div><span class="text-slate-500">Depth:</span> <span id="detailDepth"></span></div>
+                <div><span class="text-slate-500">Latency:</span> <span id="detailLatency"></span> ms</div>
+                <div><span class="text-slate-500">Inbound Links:</span> <span id="detailInbound"></span></div>
+                <div><span class="text-slate-500">Outbound Internal:</span> <span id="detailOutInternal"></span></div>
+                <div><span class="text-slate-500">Outbound External:</span> <span id="detailOutExternal"></span></div>
+              </div>
+
+              <div id="detailMetaSection" class="text-slate-400 text-[11px] italic">
+                <span class="text-slate-500 not-italic font-medium">Meta Description: </span>
+                <span id="detailMeta"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 2: Sitemap Tree -->
+        <div id="tabTree" class="tab-content hidden p-6 space-y-4">
+          <div class="flex items-center justify-between text-xs">
+            <p class="text-slate-400">Hierarchical visual sitemap generated from discovered path segments and route relationships.</p>
+            <div class="flex items-center space-x-2">
+              <button id="expandTreeBtn" class="px-2.5 py-1 rounded bg-dark-700 hover:bg-dark-600 text-slate-300 hover:text-white transition">
+                <i class="fa-solid fa-angles-down mr-1"></i> Expand All
+              </button>
+              <button id="collapseTreeBtn" class="px-2.5 py-1 rounded bg-dark-700 hover:bg-dark-600 text-slate-300 hover:text-white transition">
+                <i class="fa-solid fa-angles-up mr-1"></i> Collapse All
+              </button>
+            </div>
+          </div>
+
+          <div id="treeContainer" class="bg-dark-900 rounded-xl p-5 border border-dark-700 font-mono text-xs overflow-x-auto space-y-2">
+            <!-- Populated dynamically via JS -->
+          </div>
+        </div>
+
+        <!-- TAB 3: Pages Table -->
+        <div id="tabTable" class="tab-content hidden p-4 space-y-4">
+          <!-- Filters & Search -->
+          <div class="flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+            <div class="relative w-full sm:w-72">
+              <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"></i>
+              <input
+                type="text"
+                id="tableSearch"
+                placeholder="Search by URL or title..."
+                class="w-full pl-9 pr-3 py-2 bg-dark-900 border border-dark-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+              />
+            </div>
+
+            <div class="flex items-center space-x-2 w-full sm:w-auto">
+              <select id="statusFilter" class="bg-dark-900 border border-dark-600 rounded-lg px-3 py-2 text-slate-300 text-xs focus:outline-none">
+                <option value="all">All Statuses</option>
+                <option value="200">200 OK Only</option>
+                <option value="broken">With Broken Links</option>
+              </select>
+
+              <select id="sortBy" class="bg-dark-900 border border-dark-600 rounded-lg px-3 py-2 text-slate-300 text-xs focus:outline-none">
+                <option value="depth">Sort by Depth (Lowest first)</option>
+                <option value="latency">Sort by Latency (Slowest first)</option>
+                <option value="inbound">Sort by Inbound Links</option>
+                <option value="url">Sort by URL</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Table Container -->
+          <div class="overflow-x-auto border border-dark-700 rounded-xl">
+            <table class="w-full text-left text-xs text-slate-300">
+              <thead class="bg-dark-900 text-slate-400 font-semibold border-b border-dark-700 uppercase tracking-wider text-[11px]">
+                <tr>
+                  <th class="px-4 py-3">Status</th>
+                  <th class="px-4 py-3">Depth</th>
+                  <th class="px-4 py-3">Page Title & URL</th>
+                  <th class="px-4 py-3 text-center">Inbound</th>
+                  <th class="px-4 py-3 text-center">Outbound Int</th>
+                  <th class="px-4 py-3 text-center">Outbound Ext</th>
+                  <th class="px-4 py-3 text-right">Latency</th>
+                </tr>
+              </thead>
+              <tbody id="pagesTableBody" class="divide-y divide-dark-700 bg-dark-800">
+                <!-- Populated dynamically via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- TAB 4: Broken Links Auditor -->
+        <div id="tabBroken" class="tab-content hidden p-4 space-y-4">
+          <div class="flex items-center justify-between text-xs">
+            <p class="text-slate-400">Comprehensive diagnostic table of all broken internal or external references detected during crawling.</p>
+          </div>
+
+          <div id="brokenLinksEmpty" class="hidden text-center py-12 bg-dark-900 rounded-xl border border-dark-700">
+            <div class="w-12 h-12 rounded-full bg-emerald-500/10 text-emerald-400 flex items-center justify-center mx-auto text-xl mb-3">
+              <i class="fa-solid fa-check"></i>
+            </div>
+            <h3 class="text-sm font-bold text-white">No Broken Links Detected</h3>
+            <p class="text-xs text-slate-400 mt-1">All discovered internal routes and hyperlinks returned successful responses.</p>
+          </div>
+
+          <div id="brokenLinksTableWrapper" class="overflow-x-auto border border-dark-700 rounded-xl">
+            <table class="w-full text-left text-xs text-slate-300">
+              <thead class="bg-dark-900 text-rose-300 font-semibold border-b border-dark-700 uppercase tracking-wider text-[11px]">
+                <tr>
+                  <th class="px-4 py-3">Status</th>
+                  <th class="px-4 py-3">Target Broken URL</th>
+                  <th class="px-4 py-3">Source Page (Referrer)</th>
+                  <th class="px-4 py-3">Anchor Context</th>
+                  <th class="px-4 py-3">Diagnostics</th>
+                </tr>
+              </thead>
+              <tbody id="brokenTableBody" class="divide-y divide-dark-700 bg-dark-800">
+                <!-- Populated dynamically via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </section>
+
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-dark-700 bg-dark-800 text-slate-500 py-4 text-xs text-center">
+    <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+      <div>
+        BashCraft Web Development Recruitment Submission &bull; Developed with Precision & Asli Engineering
+      </div>
+      <div class="flex items-center space-x-4">
+        <span>Target: <a href="https://bashcraftclub.vercel.app/" target="_blank" class="text-emerald-400 hover:underline">bashcraftclub.vercel.app</a></span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/static/js/app.js"></script>
+</body>
+</html>
