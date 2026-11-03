@@ -9,7 +9,6 @@ Provides subcommands:
 
 import argparse
 import sys
-import uvicorn
 from cli import run_crawl_cli, print_banner
 
 
@@ -68,6 +67,12 @@ def main():
         )
 
     elif args.command == "serve":
+        try:
+            import uvicorn
+        except ImportError:
+            print("[x] Error: 'uvicorn' is required to launch the interactive web dashboard.")
+            print("💡 Install it using: pip install uvicorn")
+            sys.exit(1)
         print_banner()
         print(f"🚀 Starting BashCraft Sitemap Dashboard at http://{args.host}:{args.port}")
         print("💡 Open this URL in your browser to view the interactive network graph & tree visualizer.")
@@ -100,3 +105,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
