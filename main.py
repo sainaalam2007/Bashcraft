@@ -9,10 +9,36 @@ Provides subcommands:
 
 import argparse
 import sys
+import threading
+import time
+import webbrowser
 from cli import run_crawl_cli, print_banner
 
 
 DEFAULT_TARGET = "https://bashcraftclub.vercel.app/"
+
+
+def launch_web_dashboard(host: str = "127.0.0.1", port: int = 8000, reload: bool = False):
+    """Starts the FastAPI Web Dashboard and opens the browser automatically."""
+    try:
+        import uvicorn
+    except ImportError:
+        print("[x] Error: 'uvicorn' is required to launch the interactive web dashboard.")
+        print("💡 Install it using: pip install uvicorn")
+        sys.exit(1)
+
+    url = f"http://{host}:{port}"
+
+    def auto_open_browser():
+        time.sleep(1.2)
+        print(f"🌐 Opening interactive visual dashboard in your browser: {url}")
+        webbrowser.open(url)
+
+    threading.Thread(target=auto_open_browser, daemon=True).start()
+    print_banner()
+    print(f"🚀 Starting BashCraft Sitemap Dashboard at {url}")
+    print("💡 The web browser will open automatically. Press Ctrl+C in this window to stop.")
+    uvicorn.run("web.app:app", host=host, port=port, reload=reload)
 
 
 def main():
@@ -33,13 +59,13 @@ def main():
     crawl_parser.add_argument("--no-broken-check", action="store_true", help="Skip checking discovered links status")
 
     # Command: serve
-    serve_parser = subparsers.add_parser("serve", help="Launch interactive Web Dashboard")
+    serve_parser = subparsers.add_parser("serve", help="Launch interactive Web Dashboard (default)")
     serve_parser.add_argument("--host", type=str, default="127.0.0.1", help="Host address (default: 127.0.0.1)")
     serve_parser.add_argument("--port", type=int, default=8000, help="Port (default: 8000)")
     serve_parser.add_argument("--reload", action="store_true", help="Enable auto-reload for development")
 
     # Command: audit
-    audit_parser = subparsers.add_parser("audit", help="Run rapid broken-link health audit")
+    audit_parser = subparsers.add_parser("audit", help="Run rapid broken-link health audit in terminal")
     audit_parser.add_argument("url", nargs="?", default=DEFAULT_TARGET, help="Website URL to audit")
 
     # Command: demo
@@ -47,7 +73,15 @@ def main():
 
     args = parser.parse_args()
 
-    if not args.command or args.command == "crawl":
+    # Default action when clicking 'Run' or typing 'python main.py' with no arguments:
+    # Launches the beautiful interactive Web Dashboard and opens browser!
+    if not args.command or args.command == "serve":
+        host = getattr(args, "host", "127.0.0.1")
+        port = getattr(args, "port", 8000)
+        reload = getattr(args, "reload", False)
+        launch_web_dashboard(host=host, port=port, reload=reload)
+
+    elif args.command == "crawl":
         url = getattr(args, "url", DEFAULT_TARGET) or DEFAULT_TARGET
         depth = getattr(args, "depth", 3)
         max_pages = getattr(args, "max_pages", 50)
@@ -65,18 +99,6 @@ def main():
             spa_scan=spa_scan,
             check_broken=check_broken
         )
-
-    elif args.command == "serve":
-        try:
-            import uvicorn
-        except ImportError:
-            print("[x] Error: 'uvicorn' is required to launch the interactive web dashboard.")
-            print("💡 Install it using: pip install uvicorn")
-            sys.exit(1)
-        print_banner()
-        print(f"🚀 Starting BashCraft Sitemap Dashboard at http://{args.host}:{args.port}")
-        print("💡 Open this URL in your browser to view the interactive network graph & tree visualizer.")
-        uvicorn.run("web.app:app", host=args.host, port=args.port, reload=args.reload)
 
     elif args.command == "audit":
         run_crawl_cli(
