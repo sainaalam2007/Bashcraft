@@ -73,15 +73,9 @@ def main():
 
     args = parser.parse_args()
 
-    # Default action when clicking 'Run' or typing 'python main.py' with no arguments:
-    # Launches the beautiful interactive Web Dashboard and opens browser!
-    if not args.command or args.command == "serve":
-        host = getattr(args, "host", "127.0.0.1")
-        port = getattr(args, "port", 8000)
-        reload = getattr(args, "reload", False)
-        launch_web_dashboard(host=host, port=port, reload=reload)
-
-    elif args.command == "crawl":
+    # Default action when clicking 'Run' or typing 'python main.py':
+    # Runs 100% in the terminal! (No browser or external websites needed)
+    if not args.command or args.command == "crawl":
         url = getattr(args, "url", DEFAULT_TARGET) or DEFAULT_TARGET
         depth = getattr(args, "depth", 3)
         max_pages = getattr(args, "max_pages", 50)
@@ -99,6 +93,12 @@ def main():
             spa_scan=spa_scan,
             check_broken=check_broken
         )
+
+    elif args.command == "serve":
+        host = getattr(args, "host", "127.0.0.1")
+        port = getattr(args, "port", 8000)
+        reload = getattr(args, "reload", False)
+        launch_web_dashboard(host=host, port=port, reload=reload)
 
     elif args.command == "audit":
         run_crawl_cli(
