@@ -59,7 +59,7 @@ def main():
     crawl_parser.add_argument("--no-broken-check", action="store_true", help="Skip checking discovered links status")
 
     # Command: serve
-    serve_parser = subparsers.add_parser("serve", help="Launch interactive Web Dashboard (default)")
+    serve_parser = subparsers.add_parser("serve", help="Launch local web visualizer dashboard (optional)")
     serve_parser.add_argument("--host", type=str, default="127.0.0.1", help="Host address (default: 127.0.0.1)")
     serve_parser.add_argument("--port", type=int, default=8000, help="Port (default: 8000)")
     serve_parser.add_argument("--reload", action="store_true", help="Enable auto-reload for development")
